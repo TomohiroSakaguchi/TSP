@@ -11,10 +11,10 @@ int main(int argc,char *argv[])
 {
   int ncity;                    /* the total number of cities you must visit*/
   double x[MAXCITY],y[MAXCITY]; /* array for position data */
-  int nroute[MAXCITY]={0};      /* array for route data */
+  int nroute[MAXCITY]={0},min_route[MAXCITY]={0};      /* array for route data */
   double dis_tot,def_dis=0.0,new_dis=0.0,min_dis=3000000.0;               /* total distance */
 
-  /* local variables */ 
+  /* local variables */
   FILE *input, *output;
   int i,j,ii,jj,nrnd,second,tmp;
   double rx,ry,rr;
@@ -43,7 +43,7 @@ int main(int argc,char *argv[])
   }
   fclose(input);
 
-  
+
   /* Output City data (for Check) */
   printf("ncity\n");
   printf("%d\n",ncity);
@@ -71,11 +71,12 @@ int main(int argc,char *argv[])
   printf("-------------------------------\n");
   printf("Route Search Algorithm START\n");
   printf("-------------------------------\n");
-  
+
   int count = 0;
   /* set initial route*/
   for (i=0; i < ncity; i++){
     nroute[i] = i;
+    min_route[i] = i;
   }
 
   /* culculate default distance*/
@@ -94,6 +95,7 @@ int main(int argc,char *argv[])
   rr = sqrt(rx*rx + ry*ry);
   def_dis = def_dis + rr;
   printf("default dist.%lf\n",def_dis);
+  min_dis = def_dis;
 
   while(1){
   /* generate random number */
@@ -113,6 +115,7 @@ int main(int argc,char *argv[])
   for(i=0; i < ncity-1; i++){
     ii = nroute[i];
     jj = nroute[i+1];
+    //printf("%d,%lf,%lf\n",ii,x[ii],y[ii]);
     rx = x[ii] - x[jj];
     ry = y[ii] - y[jj];
     rr = sqrt(rx*rx + ry*ry);
@@ -120,28 +123,29 @@ int main(int argc,char *argv[])
   }
   ii = nroute[ncity-1];
   jj = nroute[0];
+  //printf("%d,%lf,%lf\n",ii,x[ii],y[ii]);
   rx = x[ii] - x[jj];
   ry = y[ii] - y[jj];
   rr = sqrt(rx*rx + ry*ry);
   new_dis = new_dis + rr;
   printf("swapped dist.%lf\n",new_dis);
-  
-  if(count==100){
+
+  if(new_dis <= min_dis){
+    min_dis = new_dis;
+    for(i=0 ; i < ncity ; i++){
+      min_route[i] = nroute[i];
+      printf("%d\n", min_route[i]);
+    }
+    count++;
+//    printf("これが最小やで\n");
+  }
+  else{
+  //  printf("これじゃない\n");
+  }
+  if(count==100000){
     break;
   }
-  if(new_dis < def_dis){
-    if(new_dis < min_dis){
-      min_dis = new_dis;
-//      break;
-    }
-  }
-  else{ 
-  min_dis = def_dis;
-//  tmp = nroute[nrnd];
-//  nroute[nrnd] = nroute[second];
-//  nroute[second] = tmp;
-  }
-  count++;
+
   }
   printf("-------------------------------\n");
   printf("Route Search Algorithm END\n");
@@ -162,7 +166,7 @@ int main(int argc,char *argv[])
   /* Output City Data */
   printf("Optimized Route\n");
   for (i=0 ; i < ncity ; i++){
-    j= nroute[i];
+    j= min_route[i];
     printf("%d,%lf,%lf\n",j,x[j],y[j]);
   }
 
@@ -172,15 +176,15 @@ int main(int argc,char *argv[])
   printf("Total Distance!\n");
   dis_tot = 0.0;
   for(i=0; i < ncity-1; i++){
-    ii = nroute[i];
-    jj = nroute[i+1];
+    ii = min_route[i];
+    jj = min_route[i+1];
     rx = x[ii] - x[jj];
     ry = y[ii] - y[jj];
     rr = sqrt(rx*rx + ry*ry);
     dis_tot = dis_tot + rr;
   }
-  ii = nroute[ncity-1];
-  jj = nroute[0];
+  ii = min_route[ncity-1];
+  jj = min_route[0];
   rx = x[ii] - x[jj];
   ry = y[ii] - y[jj];
   rr = sqrt(rx*rx + ry*ry);
@@ -193,10 +197,10 @@ int main(int argc,char *argv[])
   fprintf(output,"%lf\n",dis_tot);
   fprintf(output,"%20.14f\n",(double)(cpu_time2-cpu_time1)/(double)CLOCKS_PER_SEC);
   for(i = 0; i < ncity; i++){
-    j = nroute[i];
+    j = min_route[i];
     fprintf(output,"%d %lf %lf\n",j,x[j],y[j]);
   }
-  j = nroute[0];
+  j = min_route[0];
   fprintf(output,"%d %lf %lf\n",j,x[j],y[j]);
   fclose(output);
 
@@ -207,12 +211,3 @@ int main(int argc,char *argv[])
 
   return 0;
 }
-
-
-
-
-
-
-
-
-
