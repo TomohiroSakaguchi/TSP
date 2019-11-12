@@ -12,7 +12,7 @@ int main(int argc,char *argv[])
   int ncity;                    /* the total number of cities you must visit*/
   double x[MAXCITY],y[MAXCITY]; /* array for position data */
   int nroute[MAXCITY]={0};      /* array for route data */
-  double dis_tot,def_dis,new_dis;               /* total distance */
+  double dis_tot,def_dis=0.0,new_dis=0.0;               /* total distance */
 
   /* local variables */ 
   FILE *input, *output;
@@ -79,7 +79,6 @@ int main(int argc,char *argv[])
   }
 
   /* culculate default distance*/
-  def_dis = 0.0;
   for(i=0; i < ncity-1; i++){
     ii = nroute[i];
     jj = nroute[i+1];
@@ -110,7 +109,6 @@ int main(int argc,char *argv[])
   nroute[second] = tmp;
 
   /* culculate swapped distance*/
-  new_dis = 0.0;
   for(i=0; i < ncity-1; i++){
     ii = nroute[i];
     jj = nroute[i+1];
@@ -126,7 +124,15 @@ int main(int argc,char *argv[])
   rr = sqrt(rx*rx + ry*ry);
   new_dis = new_dis + rr;
   printf("swapped dist.%lf\n",new_dis);
-
+  
+  if(new_dis < def_dis){
+    def_dis = new_dis;
+  }
+  else{
+   tmp = nroute[nrnd];
+   nroute[nrnd] = nroute[second];
+   nroute[second] = tmp; 
+  }
 
   printf("-------------------------------\n");
   printf("Route Search Algorithm END\n");
